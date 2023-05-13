@@ -17,10 +17,6 @@ kern <- function(d, l, nu) {
   exp(-d/l)
 }
 
-# kern_ab <- function(a, b, l, nu) {
-#   (1 + (a^2 + b^2) / (nu * l^2)) ^ (-(nu + 1) / 2)
-# }
-
 kern_ab <- function(a, b, l, nu) {
   exp(-sqrt(a^2 + b^2)/l)
 }
@@ -89,7 +85,7 @@ gen_data <- function(seed = 12, M = 10, C = 4, l = 0.3, n = 564, G = 3, S = 20,
                      int = -2.5, slope = -0.15, house_dist = 'uniform') {
     set.seed(seed)
    if (house_dist == 'uniform') {
-      xy <- sobol(n, dim = 2)
+      xy <- randtoolbox::sobol(n, dim = 2)
       a <- xy[,1] * M
       b <- xy[,2] * C
    } else if (house_dist == 'clustered_uniform') {
@@ -142,23 +138,18 @@ gen_data <- function(seed = 12, M = 10, C = 4, l = 0.3, n = 564, G = 3, S = 20,
      a <- c(a,a_new)
      b <- c(b,b_new)
    }
-     
     risk_bind_x <- function(a,b) {
       return(stats::integrate(kernel_x, 0, M, a, b, l, 5, M))
     }
-    
     risk_bind_y <- function(a,b) {
       return(stats::integrate(kernel_y, 0, C, a, b, l, 5, M, C))
     }
-    
     risk_bind_x2 <- function(a,b) {
       return(stats::integrate(kernel_x2, 0, M, a, b, l, 5, M, C))
     }
-    
     total_risk_bind <- function(a,b) {
       return(risk_bind_x(a,b)$value + risk_bind_y(a,b)$value + risk_bind_x2(a,b)$value)
     }
-    
     canal_risk <- mapply(function(x,y) total_risk_bind(x,y), a, b)
     x <- rnorm(n)
     x <- scale(x)[,1]
